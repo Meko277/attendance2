@@ -274,9 +274,8 @@ function applyCardData(card, data, { isNew = false } = {}) {
   card.dataset.name = data.name || "";
   card.dataset.dob = data.dob || "";
 
-  const age = data.age ?? calculateAge(data.dob);
-
   // Name / meta text
+  const age = calculateAge(data.dob);
   card.querySelector(".avatar-initials").textContent = getInitials(
     data.name || "?",
   );
@@ -451,13 +450,12 @@ childForm.addEventListener("submit", async (event) => {
   try {
     if (editingChildId) {
       // Editing an existing child: keep their points untouched, update the rest
-      await updateDoc(doc(db, "children", editingChildId), { name, age, dob });
+      await updateDoc(doc(db, "children", editingChildId), { name, dob });
       showToast(`${name}'s details were updated`);
     } else {
       // Adding a brand-new child, starting at 0 points
       await addDoc(childrenCollection, {
         name,
-        age,
         dob,
         points: 0,
         createdAt: serverTimestamp(),
@@ -549,7 +547,6 @@ childGrid.addEventListener("click", (event) => {
   if (event.target.closest(".edit-btn")) {
     openEditModal(id, {
       name: card.dataset.name || "",
-      age: card.dataset.age || "",
       dob: card.dataset.dob || "",
     });
     return;
