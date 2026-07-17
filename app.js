@@ -26,7 +26,7 @@ import {
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 // vvvvvvvvvvvvvvvvvvvvvv  PASTE YOUR FIREBASE CONFIG HERE  vvvvvvvvvvvvvvvvvvvvvv
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // ❗ Replace with your actual API key
+  apiKey: "AIzaSyD4ENSYFjyTA1N5gBleUMVTOJsP2i4EnmU", // ❗ Replace with your actual API key
   authDomain: "attendance-765b1.firebaseapp.com",
   projectId: "attendance-765b1",
   storageBucket: "attendance-765b1.firebasestorage.app",
