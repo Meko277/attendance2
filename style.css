@@ -1,0 +1,861 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   A small, named palette instead of scattered hex values everywhere.
+   ========================================================================== */
+:root {
+  /* Colors */
+  --bg: #f2f5fb; /* soft lavender-blue page background */
+  --surface: rgba(255, 255, 255, 0.72); /* glass card surface */
+  --surface-solid: #ffffff;
+  --ink: #2d3142; /* primary text */
+  --ink-soft: #6b7085; /* secondary text */
+  --coral: #ff6b6b; /* energy / points / danger accents */
+  --coral-dark: #e85555;
+  --teal: #4ecdc4; /* primary action color */
+  --teal-dark: #33aba3;
+  --sun: #ffd166; /* rank / star accents */
+  --sun-dark: #f2b705;
+  --mint: #06d6a0; /* success / online */
+  --ring-track: #e7ecf6;
+
+  /* Rank tier colors */
+  --tier-rookie: #9aa5c9;
+  --tier-bronze: #c97b4a;
+  --tier-silver: #9aa3ae;
+  --tier-gold: #e3a72b;
+
+  /* Type */
+  --font-display: "Baloo 2", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  /* Shape & shadow */
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --shadow-soft:
+    0 10px 30px rgba(45, 49, 66, 0.08), 0 2px 6px rgba(45, 49, 66, 0.06);
+  --shadow-lift:
+    0 18px 40px rgba(45, 49, 66, 0.14), 0 4px 10px rgba(45, 49, 66, 0.08);
+}
+
+/* ==========================================================================
+   RESET & BASE
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  margin: 0;
+  color: var(--ink);
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+input {
+  font-family: var(--font-body);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   AMBIENT BACKGROUND BLOBS (decorative, fixed behind content)
+   ========================================================================== */
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-blob--one {
+  width: 420px;
+  height: 420px;
+  background: var(--teal);
+  top: -120px;
+  left: -120px;
+}
+.bg-blob--two {
+  width: 380px;
+  height: 380px;
+  background: var(--sun);
+  bottom: -140px;
+  right: -100px;
+}
+.bg-blob--three {
+  width: 260px;
+  height: 260px;
+  background: var(--coral);
+  top: 40%;
+  right: 10%;
+  opacity: 0.15;
+}
+
+/* ==========================================================================
+   LAYOUT SHELL
+   ========================================================================== */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-badge {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--sun), var(--coral));
+  color: white;
+  font-size: 26px;
+  box-shadow: var(--shadow-soft);
+  transform: rotate(-6deg);
+}
+
+.brand-text h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.brand-text p {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Connection status pill — quiet feedback that Firestore is live */
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 26px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.connection-status .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sun-dark);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+.connection-status.is-live .dot {
+  background: var(--mint);
+}
+.connection-status.is-error .dot {
+  background: var(--coral);
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+.btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  font-weight: 800;
+  font-size: 15px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: white;
+  box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.5);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 2px solid #e2e6f0;
+}
+.btn-ghost:hover {
+  background: #eef1f8;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  color: white;
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+.btn-danger:hover {
+  filter: brightness(1.06);
+}
+
+.btn-add .plus-icon {
+  display: inline-block;
+  font-size: 18px;
+  margin-right: 2px;
+}
+
+body.dark {
+  --bg: #0f172a;
+  --surface: rgba(15, 23, 42, 0.86);
+  --surface-solid: #172033;
+  --ink: #f8fafc;
+  --ink-soft: #cbd5e1;
+  --ring-track: #243244;
+  --shadow-soft:
+    0 10px 30px rgba(2, 8, 23, 0.35), 0 2px 6px rgba(2, 8, 23, 0.2);
+  --shadow-lift:
+    0 18px 40px rgba(2, 8, 23, 0.42), 0 4px 10px rgba(2, 8, 23, 0.3);
+}
+
+body.dark .btn-ghost {
+  background: rgba(15, 23, 42, 0.4);
+  border-color: rgba(148, 163, 184, 0.26);
+  color: var(--ink);
+}
+
+body.dark .icon-btn {
+  background: rgba(15, 23, 42, 0.84);
+  color: var(--ink);
+}
+
+body.dark .avatar {
+  background: linear-gradient(135deg, #243244, #1c2635);
+}
+
+body.dark .avatar-initials,
+body.dark .child-name {
+  color: var(--ink);
+}
+
+body.dark .field input,
+body.dark .custom-point-input {
+  background: rgba(15, 23, 42, 0.8);
+  color: var(--ink);
+  border-color: rgba(148, 163, 184, 0.26);
+}
+
+body.dark .modal-card {
+  background: var(--surface-solid);
+}
+
+body.dark .bg-blob {
+  opacity: 0.16;
+}
+
+/* ==========================================================================
+   EMPTY STATE
+   ========================================================================== */
+.empty-state {
+  text-align: center;
+  padding: 70px 20px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  animation: fade-in 0.4s ease both;
+}
+.empty-emoji {
+  font-size: 56px;
+  margin-bottom: 10px;
+}
+.empty-state h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.empty-state p {
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   CHILD GRID
+   ========================================================================== */
+.child-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 22px;
+}
+
+/* ==========================================================================
+   CHILD CARD
+   ========================================================================== */
+.child-card {
+  position: relative;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px 20px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  animation: card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.child-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Card entrance: fade + slide + gentle overshoot */
+@keyframes card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card exit: used briefly before a card is removed from the DOM */
+.child-card.is-leaving {
+  animation: card-out 0.3s ease forwards;
+  pointer-events: none;
+}
+@keyframes card-out {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.92);
+  }
+}
+
+.card-top-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-soft);
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+.icon-btn:active {
+  transform: scale(0.9);
+}
+.icon-btn.edit-btn:hover {
+  background: #eaf9f7;
+}
+.icon-btn.delete-btn:hover {
+  background: #fdecec;
+}
+
+/* --- Avatar + progress ring (signature element) --- */
+.avatar-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 14px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg); /* start the progress arc from the top */
+}
+.ring-bg,
+.ring-fill {
+  fill: none;
+  stroke-width: 8;
+}
+.ring-bg {
+  stroke: var(--ring-track);
+}
+.ring-fill {
+  stroke: var(--teal);
+  stroke-linecap: round;
+  stroke-dasharray: 326.7; /* 2 * PI * 52, precomputed circumference */
+  stroke-dashoffset: 326.7;
+  transition:
+    stroke-dashoffset 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+    stroke 0.4s ease;
+}
+
+.avatar {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff, #f0f3fa);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+.avatar-initials {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rank-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-solid);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  box-shadow: var(--shadow-soft);
+  border: 2px solid white;
+}
+
+/* Pulse when the child levels up into a new rank */
+.rank-badge.is-leveling-up {
+  animation: level-up-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes level-up-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.5) rotate(-10deg);
+  }
+  70% {
+    transform: scale(0.9) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+.child-name {
+  font-size: 19px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.child-meta {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+.rank-name {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--teal-dark);
+}
+
+/* --- Points display --- */
+.points-display {
+  margin: 14px 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.points-number {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--coral);
+  line-height: 1;
+  display: inline-block;
+}
+/* Pop/bounce whenever points change */
+.points-number.is-popping {
+  animation: points-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes points-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35) translateY(-4px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+.points-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+/* Floating "+N" indicator that flies up when points are added */
+.floater {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--mint);
+  pointer-events: none;
+  animation: float-up 0.9s ease forwards;
+  z-index: 5;
+}
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px);
+  }
+}
+
+/* --- Point controls --- */
+.point-controls {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-point {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 0;
+  flex: 1 1 0;
+  min-width: 58px;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 6px 14px rgba(255, 209, 102, 0.45);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+.btn-point:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+.btn-point:active {
+  transform: scale(0.92);
+}
+
+.btn-point--add {
+  background: linear-gradient(135deg, var(--sun), var(--sun-dark));
+  color: #4a3300;
+}
+
+.btn-point--remove {
+  background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  color: white;
+  box-shadow: 0 6px 14px rgba(255, 107, 107, 0.35);
+}
+
+.custom-point-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.custom-point-actions {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 180px;
+}
+.custom-point-input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid #e2e6f0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: border-color 0.15s ease;
+}
+.custom-point-input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+.btn-point--custom {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: white;
+  box-shadow: 0 6px 14px rgba(78, 205, 196, 0.4);
+  padding: 8px 18px;
+  flex: 1 1 0;
+}
+
+/* ==========================================================================
+   MODALS (Add / Edit / Delete confirm)
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 49, 66, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  animation: overlay-in 0.2s ease both;
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-card {
+  background: var(--surface-solid);
+  border-radius: var(--radius-lg);
+  padding: 30px 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lift);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modal-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.modal-card--small {
+  max-width: 380px;
+}
+
+@keyframes modal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.field input {
+  border: 2px solid #e2e6f0;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+  transition: border-color 0.15s ease;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.form-error {
+  margin: -6px 0 0;
+  color: var(--coral-dark);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   TOAST
+   ========================================================================== */
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--ink);
+  color: white;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: var(--shadow-lift);
+  z-index: 60;
+  animation: toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.toast.hidden {
+  display: none;
+}
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+.toast.is-leaving {
+  animation: toast-out 0.25s ease forwards;
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+@media (max-width: 640px) {
+  .app {
+    padding: 16px 14px 60px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+
+  .child-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-text h1 {
+    font-size: 24px;
+  }
+
+  .modal-card {
+    padding: 24px 20px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .app {
+    max-width: 1400px;
+  }
+}

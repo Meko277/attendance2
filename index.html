@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Star Trackers · Attendance &amp; Reward Board</title>
+
+    <!-- Google Fonts: Baloo 2 for playful display headings, Nunito for readable body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Ambient background blobs (pure decoration, sit behind everything) -->
+    <div class="bg-blob bg-blob--one" aria-hidden="true"></div>
+    <div class="bg-blob bg-blob--two" aria-hidden="true"></div>
+    <div class="bg-blob bg-blob--three" aria-hidden="true"></div>
+
+    <div class="app">
+      <!-- ============ HEADER ============ -->
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-badge">★</span>
+          <div class="brand-text">
+            <h1>Star Trackers</h1>
+            <p>Attendance &amp; reward board</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button
+            id="themeToggleBtn"
+            class="btn btn-ghost theme-toggle"
+            type="button"
+            aria-pressed="false"
+            title="Toggle dark mode"
+          >
+            <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+            <span class="theme-toggle__label">Dark mode</span>
+          </button>
+          <button id="openAddModalBtn" class="btn btn-primary btn-add">
+            <span class="plus-icon">+</span> Add child
+          </button>
+        </div>
+      </header>
+
+      <!-- Connection status pill: tells the user whether Firebase is live -->
+      <div id="connectionStatus" class="connection-status">
+        <span class="dot"></span>
+        <span id="connectionStatusText">Connecting to live sync…</span>
+      </div>
+
+      <!-- ============ MAIN CONTENT ============ -->
+      <main>
+        <!-- Shown only when there are no children yet -->
+        <section id="emptyState" class="empty-state hidden">
+          <div class="empty-emoji">🌟</div>
+          <h2>No stars on the board yet</h2>
+          <p>Add your first child to start tracking attendance and rewards.</p>
+          <button class="btn btn-primary" id="emptyStateAddBtn">
+            + Add a child
+          </button>
+        </section>
+
+        <!-- The live grid of child cards is rendered here by app.js -->
+        <section id="childGrid" class="child-grid" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <!-- ============ ADD / EDIT MODAL ============ -->
+    <!-- Reused for both "Add child" and "Edit child" — app.js swaps the title/values -->
+    <div id="childModalOverlay" class="modal-overlay hidden">
+      <form id="childForm" class="modal-card" novalidate>
+        <h2 id="modalTitle">Add a child</h2>
+
+        <label class="field">
+          <span>Name</span>
+          <input type="text" id="fieldName" placeholder="e.g. Amira" required />
+        </label>
+
+        <label class="field">
+          <span>Date of birth</span>
+          <input type="date" id="fieldDob" required />
+        </label>
+
+        <p id="formError" class="form-error hidden"></p>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-ghost">
+            Cancel
+          </button>
+          <button type="submit" id="saveChildBtn" class="btn btn-primary">
+            Save child
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ============ DELETE CONFIRM MODAL ============ -->
+    <div id="deleteModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card modal-card--small">
+        <h2>Remove this child?</h2>
+        <p id="deleteModalText">
+          This will permanently delete their record and points.
+        </p>
+        <div class="modal-actions">
+          <button type="button" id="cancelDeleteBtn" class="btn btn-ghost">
+            Cancel
+          </button>
+          <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast notification for quick feedback (e.g. "Points added!") -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Card template used by app.js to stamp out each child -->
+    <template id="childCardTemplate">
+      <article class="child-card" data-id="">
+        <div class="card-top-actions">
+          <button
+            class="icon-btn edit-btn"
+            title="Edit child"
+            aria-label="Edit child"
+          >
+            ✎
+          </button>
+          <button
+            class="icon-btn delete-btn"
+            title="Delete child"
+            aria-label="Delete child"
+          >
+            🗑
+          </button>
+        </div>
+
+        <div class="avatar-wrap">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fill" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="avatar"><span class="avatar-initials"></span></div>
+          <div class="rank-badge" title=""></div>
+        </div>
+
+        <h3 class="child-name"></h3>
+        <p class="child-meta"></p>
+        <p class="rank-name"></p>
+
+        <div class="points-display">
+          <span class="points-number" data-points="0">0</span>
+          <span class="points-label">points</span>
+        </div>
+
+        <div class="point-controls">
+          <div class="quick-buttons">
+            <button
+              class="btn-point btn-point--remove"
+              data-action="remove"
+              data-amount="5"
+            >
+              −5
+            </button>
+            <button
+              class="btn-point btn-point--remove"
+              data-action="remove"
+              data-amount="10"
+            >
+              −10
+            </button>
+            <button
+              class="btn-point btn-point--remove"
+              data-action="remove"
+              data-amount="50"
+            >
+              −50
+            </button>
+            <button
+              class="btn-point btn-point--add"
+              data-action="add"
+              data-amount="5"
+            >
+              +5
+            </button>
+            <button
+              class="btn-point btn-point--add"
+              data-action="add"
+              data-amount="10"
+            >
+              +10
+            </button>
+            <button
+              class="btn-point btn-point--add"
+              data-action="add"
+              data-amount="50"
+            >
+              +50
+            </button>
+          </div>
+          <form class="custom-point-form">
+            <input
+              type="number"
+              class="custom-point-input"
+              placeholder="Custom amount"
+              aria-label="Custom point amount"
+            />
+            <div class="custom-point-actions">
+              <button
+                type="submit"
+                class="btn-point btn-point--custom btn-point--add"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                class="btn-point btn-point--custom btn-point--remove"
+                data-action="remove"
+              >
+                Remove
+              </button>
+            </div>
+          </form>
+        </div>
+      </article>
+    </template>
+
+    <!-- ============ FIREBASE ============ -->
+    <!-- Modular Firebase v10 SDK, loaded straight from Google's CDN as ES modules -->
+    <script type="module" src="app.js">
+      
+    </script>
+  </body>
+</html>
