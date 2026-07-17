@@ -22,6 +22,17 @@
     <div class="bg-blob bg-blob--three" aria-hidden="true"></div>
 
     <div class="app">
+      <!-- Shown via an inline script if the Firebase config is incomplete -->
+      <div id="configError" class="config-error hidden">
+        <h2>Configuration Needed</h2>
+        <p>
+          Your Firebase API key is missing. Please open <code>app.js</code>,
+          find the <code>firebaseConfig</code> object, and replace
+          <code>"YOUR_API_KEY"</code> with your actual key from the Firebase
+          console.
+        </p>
+      </div>
+
       <!-- ============ HEADER ============ -->
       <header class="topbar">
         <div class="brand">
@@ -234,8 +245,21 @@
 
     <!-- ============ FIREBASE ============ -->
     <!-- Modular Firebase v10 SDK, loaded straight from Google's CDN as ES modules -->
-    <script type="module" src="app.js">
-      
+    <script type="module">
+      // A small pre-flight check to ensure the Firebase config has been updated.
+      // This is the most common reason for the app not "working" on first run.
+      import { firebaseConfig } from "./app.js";
+      if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+        const errorEl = document.getElementById("configError");
+        if (errorEl) errorEl.classList.remove("hidden");
+
+        // Hide the rest of the app to avoid user confusion
+        document.querySelector(".topbar").classList.add("hidden");
+        document.getElementById("connectionStatus").classList.add("hidden");
+        document.getElementById("childGrid").classList.add("hidden");
+        document.getElementById("emptyState").classList.add("hidden");
+      }
     </script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
