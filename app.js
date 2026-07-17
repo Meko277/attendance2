@@ -25,7 +25,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 // vvvvvvvvvvvvvvvvvvvvvv  PASTE YOUR FIREBASE CONFIG HERE  vvvvvvvvvvvvvvvvvvvvvv
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "YOUR_API_KEY", // ❗ Replace with your actual API key
   authDomain: "attendance-765b1.firebaseapp.com",
   projectId: "attendance-765b1",
@@ -438,9 +438,9 @@ childForm.addEventListener("submit", async (event) => {
 
   const name = fieldName.value.trim();
   const dob = fieldDob.value;
-  const age = calculateAge(dob);
 
-  if (!name || !dob || age === null) {
+  // The `required` attribute on the inputs prevents most invalid states, but this is a good safeguard.
+  if (!name || !dob) {
     formError.textContent = "Please fill in a valid name and date of birth.";
     formError.classList.remove("hidden");
     return;
