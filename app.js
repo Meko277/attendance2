@@ -11,22 +11,22 @@
       tablet...) will now stay in sync automatically through onSnapshot.
    ========================================================================== */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
   collection,
-  onSnapshot,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
-  serverTimestamp,
+  onSnapshot,
   increment,
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+// vvvvvvvvvvvvvvvvvvvvvv  PASTE YOUR FIREBASE CONFIG HERE  vvvvvvvvvvvvvvvvvvvvvv
 const firebaseConfig = {
-  apiKey: "AIzaSyD4ENSYFjyTA1N5gBleUMVTOJsP2i4EnmU",
+  apiKey: "YOUR_API_KEY", // ❗ Replace with your actual API key
   authDomain: "attendance-765b1.firebaseapp.com",
   projectId: "attendance-765b1",
   storageBucket: "attendance-765b1.firebasestorage.app",
@@ -35,11 +35,11 @@ const firebaseConfig = {
   measurementId: "G-LV64L0Y8SB",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-console.log("Firebase initialized!");
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+const db = getFirestore(app);
+const childrenCollection = collection(db, "children");
 
 /* ==========================================================================
    RANK / TIER SYSTEM
