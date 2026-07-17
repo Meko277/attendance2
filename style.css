@@ -38,6 +38,29 @@
     0 18px 40px rgba(45, 49, 66, 0.14), 0 4px 10px rgba(45, 49, 66, 0.08);
 }
 
+.config-error {
+  background: var(--coral);
+  color: white;
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-lift);
+}
+.config-error h2 {
+  color: white;
+  margin-bottom: 8px;
+}
+.config-error p {
+  margin: 0;
+  font-weight: 600;
+}
+.config-error code {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-family: monospace;
+}
+
 /* ==========================================================================
    RESET & BASE
    ========================================================================== */
@@ -329,6 +352,11 @@ body.dark .bg-blob {
   opacity: 0.16;
 }
 
+body.dark .rank-name {
+  /* Use lighter teal for better contrast on dark bg */
+  color: var(--teal);
+}
+
 /* ==========================================================================
    EMPTY STATE
    ========================================================================== */
@@ -419,6 +447,9 @@ body.dark .bg-blob {
   right: 14px;
   display: flex;
   gap: 6px;
+  /* Fade in on hover for a cleaner look */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .icon-btn {
@@ -446,6 +477,10 @@ body.dark .bg-blob {
 }
 .icon-btn.delete-btn:hover {
   background: #fdecec;
+}
+
+.child-card:hover .card-top-actions {
+  opacity: 1;
 }
 
 /* --- Avatar + progress ring (signature element) --- */
