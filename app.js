@@ -24,9 +24,10 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
 // vvvvvvvvvvvvvvvvvvvvvv  PASTE YOUR FIREBASE CONFIG HERE  vvvvvvvvvvvvvvvvvvvvvv
 export const firebaseConfig = {
-  apiKey: "AIzaSyD4ENSYFjyTA1N5gBleUMVTOJsP2i4EnmU", // ❗ Replace with your actual API key
+  apiKey: "AIzaSyD4ENSYFjyTA1N5gBleUMVTOJsP2i4EnmU",
   authDomain: "attendance-765b1.firebaseapp.com",
   projectId: "attendance-765b1",
   storageBucket: "attendance-765b1.firebasestorage.app",
@@ -35,11 +36,43 @@ export const firebaseConfig = {
   measurementId: "G-LV64L0Y8SB",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-const childrenCollection = collection(db, "children");
+// Initialize Firebase with error handling
+let app;
+let db;
+let childrenCollection;
+
+function initializeFirebase() {
+  // Explicitly check for the placeholder API key. This is the root of the issue.
+  if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+    console.error("Firebase configuration is missing. Please update app.js");
+    const errorEl = document.getElementById("configError");
+    if (errorEl) {
+      errorEl.classList.remove("hidden");
+      const topbarEl = document.querySelector(".topbar");
+      if (topbarEl) {
+        topbarEl.classList.add("hidden");
+      }
+      const connectionStatusEl = document.getElementById("connectionStatus");
+      if (connectionStatusEl) {
+        connectionStatusEl.classList.add("hidden");
+      }
+    }
+    // Stop the initialization process
+    return;
+  }
+
+  // If the key is not the placeholder, proceed with initialization.
+  app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  db = getFirestore(app);
+  childrenCollection = collection(db, "children");
+  console.log("Firebase initialized successfully");
+}
+
+// Global error handler
+window.addEventListener("error", (event) => {
+  console.error("Global error:", event.error);
+});
 
 /* ==========================================================================
    RANK / TIER SYSTEM
@@ -103,8 +136,48 @@ const modalTitle = document.getElementById("modalTitle");
 const saveChildBtn = document.getElementById("saveChildBtn");
 const formError = document.getElementById("formError");
 
+// Points modal elements
+const pointsModalOverlay = document.getElementById("pointsModalOverlay");
+const closePointsModalBtn = document.getElementById("closePointsModalBtn");
+const pointsModalName = document.getElementById("pointsModalName");
+const pointsModalGrade = document.getElementById("pointsModalGrade");
+const pointsModalRank = document.getElementById("pointsModalRank");
+const pointsModalValue = document.getElementById("pointsModalValue");
+const pointsModalRingFill = document.querySelector(".ring-fill--large");
+const pointsModalAvatarInitials = document.querySelector(
+  ".avatar-initials--large",
+);
+const pointsModalRankBadge = document.querySelector(".rank-badge--large");
+
+// Form fields
 const fieldName = document.getElementById("fieldName");
 const fieldDob = document.getElementById("fieldDob");
+const fieldGrade = document.getElementById("fieldGrade");
+const fieldAddress = document.getElementById("fieldAddress");
+const fieldPhone = document.getElementById("fieldPhone");
+const fieldMotherPhone = document.getElementById("fieldMotherPhone");
+const fieldSchool = document.getElementById("fieldSchool");
+const fieldTalent = document.getElementById("fieldTalent");
+const fieldFatherConfession = document.getElementById("fieldFatherConfession");
+const fieldInScout = document.getElementById("fieldInScout");
+const fieldFatherJob = document.getElementById("fieldFatherJob");
+const fieldFatherPhone = document.getElementById("fieldFatherPhone");
+const fieldFatherFatherConfession = document.getElementById(
+  "fieldFatherFatherConfession",
+);
+const fieldChurch = document.getElementById("fieldChurch");
+const fieldMotherName = document.getElementById("fieldMotherName");
+const fieldMotherJob = document.getElementById("fieldMotherJob");
+const fieldMotherFatherConfession = document.getElementById(
+  "fieldMotherFatherConfession",
+);
+const fieldSiblingsCount = document.getElementById("fieldSiblingsCount");
+const fieldSiblingsNames = document.getElementById("fieldSiblingsNames");
+const fieldSiblingsDob = document.getElementById("fieldSiblingsDob");
+const fieldNotes = document.getElementById("fieldNotes");
+
+// Search
+const searchInput = document.getElementById("searchInput");
 
 const deleteModalOverlay = document.getElementById("deleteModalOverlay");
 const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
@@ -117,6 +190,237 @@ const toastEl = document.getElementById("toast");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 
 const THEME_STORAGE_KEY = "star-trackers-theme";
+const LANGUAGE_STORAGE_KEY = "star-trackers-language";
+
+// Translation object
+const translations = {
+  en: {
+    // Header
+    brandTitle: "St.George Church",
+    brandSubtitle: "Attendance & reward board",
+    // Buttons
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
+    addChild: "Add child",
+    saveChild: "Save child",
+    saveChanges: "Save changes",
+    cancel: "Cancel",
+    delete: "Delete",
+    // Grade filters
+    all: "All",
+    fourth: "4th",
+    fifth: "5th",
+    sixth: "6th",
+    // Empty state
+    noStars: "No stars on the board yet",
+    addFirstChild:
+      "Add your first child to start tracking attendance and rewards.",
+    addChildBtn: "+ Add a child",
+    // Modal
+    addChildTitle: "Add a child",
+    editTitle: "Edit",
+    // Fields
+    name: "Name",
+    dateOfBirth: "Date of birth",
+    grade: "Grade",
+    address: "Address",
+    phoneNumber: "Phone number",
+    mothersPhone: "Mother's phone number (if no phone)",
+    schoolName: "School name",
+    talent: "Talent or sport",
+    fathersConfession: "Father's confession",
+    inScout: "In scout",
+    fathersJob: "Father's job",
+    fathersPhone: "Father's phone",
+    fathersFathersConfession: "Father's father's confession",
+    church: "Church",
+    mothersName: "Mother's full name",
+    mothersJob: "Mother's job",
+    mothersFathersConfession: "Mother's father's confession",
+    siblingsCount: "Number of brothers/sisters",
+    siblingsNames: "Names of brothers/sisters",
+    siblingsDob: "Date of birth of brothers/sisters",
+    notes: "Important notes",
+    // Details
+    addressLabel: "Address:",
+    phoneLabel: "Phone:",
+    schoolLabel: "School:",
+    talentLabel: "Talent/Sport:",
+    fathersConfessionLabel: "Father's confession:",
+    inScoutLabel: "In Scout:",
+    fathersJobLabel: "Father's job:",
+    fathersPhoneLabel: "Father's phone:",
+    fathersFathersConfessionLabel: "Father's father's confession:",
+    churchLabel: "Church:",
+    mothersNameLabel: "Mother's name:",
+    mothersPhoneLabel: "Mother's phone:",
+    mothersJobLabel: "Mother's job:",
+    mothersFathersConfessionLabel: "Mother's father's confession:",
+    siblingsLabel: "Siblings:",
+    notesLabel: "Notes:",
+    // Other
+    showDetails: "Show details",
+    hideDetails: "Hide details",
+    export: "Export",
+    searchPlaceholder: "Search children...",
+    noGrade: "No grade set",
+    noChildren: "No children found in",
+    exported: "children to file",
+    // Points
+    points: "points",
+    customAmount: "Custom amount",
+    add: "Add",
+    remove: "Remove",
+    // Delete modal
+    removeChild: "Remove this child?",
+    deleteWarning: "This will permanently delete their record and points.",
+    // Yes/No
+    yes: "Yes",
+    no: "No",
+    selectGrade: "Select grade",
+  },
+  ar: {
+    // Header
+    brandTitle: "كنيسة القديس جورجيوس",
+    brandSubtitle: "لوحة الحضور والجوائز",
+    // Buttons
+    darkMode: "الوضع الداكن",
+    lightMode: "الوضع المضيء",
+    addChild: "إضافة طفل",
+    saveChild: "حفظ الطفل",
+    saveChanges: "حفظ التغييرات",
+    cancel: "إلغاء",
+    delete: "حذف",
+    // Grade filters
+    all: "الكل",
+    fourth: "الصف 4",
+    fifth: "الصف 5",
+    sixth: "الصف 6",
+    // Empty state
+    noStars: "لا توجد نجوم على اللوحة بعد",
+    addFirstChild: "أضف طفلك الأول لبدء تتبع الحضور والجوائز.",
+    addChildBtn: "+ إضافة طفل",
+    // Modal
+    addChildTitle: "إضافة طفل",
+    editTitle: "تعديل",
+    // Fields
+    name: "الاسم",
+    dateOfBirth: "تاريخ الميلاد",
+    grade: "الصف",
+    address: "العنوان",
+    phoneNumber: "رقم الهاتف",
+    mothersPhone: "هاتف الأم (إذا لم يكن هناك هاتف)",
+    schoolName: "اسم المدرسة",
+    talent: "الموهب أو الرياضة",
+    fathersConfession: "اعتراف الأب",
+    inScout: "في الكشافة",
+    fathersJob: "وظيفة الأب",
+    fathersPhone: "هاتف الأب",
+    fathersFathersConfession: "اعتراف أب الأب",
+    church: "الكنيسة",
+    mothersName: "اسم الأم الكامل",
+    mothersJob: "وظيفة الأم",
+    mothersFathersConfession: "اعتراف جد الأم",
+    siblingsCount: "عدد الأخواء",
+    siblingsNames: "أسماء الأخواء",
+    siblingsDob: "تاريخ ميلاد الأخواء",
+    notes: "ملاحظات مهمة",
+    // Details
+    addressLabel: "العنوان:",
+    phoneLabel: "الهاتف:",
+    schoolLabel: "المدرسة:",
+    talentLabel: "الموهب/الرياضة:",
+    fathersConfessionLabel: "اعتراف الأب:",
+    inScoutLabel: "في الكشافة:",
+    fathersJobLabel: "وظيفة الأب:",
+    fathersPhoneLabel: "هاتف الأب:",
+    fathersFathersConfessionLabel: "اعتراف أب الأب:",
+    churchLabel: "الكنيسة:",
+    mothersNameLabel: "اسم الأم:",
+    mothersPhoneLabel: "هاتف الأم:",
+    mothersJobLabel: "وظيفة الأم:",
+    mothersFathersConfessionLabel: "اعتراف جد الأم:",
+    siblingsLabel: "الأخواء:",
+    notesLabel: "الملاحظات:",
+    // Other
+    showDetails: "إظهار التفاصيل",
+    hideDetails: "إخفاء التفاصيل",
+    export: "تصدير",
+    searchPlaceholder: "بحث عن الأطفال...",
+    noGrade: "لا يوجد صف",
+    noChildren: "لا يوجد أطفال في",
+    exported: "طفل تم تصديرهم",
+    // Points
+    points: "نقطة",
+    customAmount: "مبلغ مخصص",
+    add: "إضافة",
+    remove: "إزالة",
+    // Delete modal
+    removeChild: "حذف هذا الطفل؟",
+    deleteWarning: "سيتم حذف سجله ونقاطه بشكل دائم.",
+    // Yes/No
+    yes: "نعم",
+    no: "لا",
+    selectGrade: "اختر الصف",
+  },
+};
+
+let currentLanguage = "en";
+
+function applyLanguage(lang) {
+  currentLanguage = lang;
+  document.body.classList.toggle("arabic", lang === "ar");
+  document.body.lang = lang;
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+
+  // Update language toggle button
+  const langToggleBtn = document.getElementById("languageToggleBtn");
+  if (langToggleBtn) {
+    const label = langToggleBtn.querySelector(".language-toggle__label");
+    if (label) label.textContent = lang === "en" ? "AR" : "EN";
+  }
+
+  // Update all translatable elements
+  updateTranslations();
+}
+
+function updateTranslations() {
+  const t = translations[currentLanguage];
+  if (!t) return;
+
+  // Update elements with data-translate-key
+  document.querySelectorAll("[data-translate-key]").forEach((el) => {
+    const key = el.dataset.translateKey;
+    if (t[key]) {
+      el.textContent = t[key];
+    }
+  });
+
+  // Update dynamic elements
+  if (modalTitle) {
+    if (editingChildId) {
+      modalTitle.textContent = `${t.editTitle} ${fieldName.value || ""}`;
+    }
+  }
+  if (saveChildBtn) {
+    const saveChildSpan = saveChildBtn.querySelector("span");
+    if (saveChildSpan) {
+      saveChildSpan.textContent = editingChildId ? t.saveChanges : t.saveChild;
+    }
+  }
+  if (searchInput) {
+    searchInput.placeholder = t.searchPlaceholder;
+  }
+  const gradeOptions = document.querySelector("#fieldGrade option");
+  if (gradeOptions) {
+    gradeOptions.textContent = t.selectGrade;
+  }
+}
+
+function initLanguage() {
+  const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  applyLanguage(savedLang || "en");
+}
 
 function applyTheme(theme) {
   const isDark = theme === "dark";
@@ -152,7 +456,419 @@ const lastKnownPointsById = new Map();
 let editingChildId = null;
 let deletingChildId = null;
 
-initTheme();
+// Search query
+let searchQuery = "";
+
+// Grade filter
+let gradeFilter = "all";
+
+// Store all children data for sorting
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  initLanguage();
+
+  // Set a timeout to show error if connection takes too long
+  let connectionTimeout = setTimeout(() => {
+    if (!connectionStatus.classList.contains("is-live")) {
+      setConnectionStatus("error");
+    }
+  }, 10000); // 10 seconds timeout
+
+  try {
+    initializeFirebase();
+    // Start listener only if initialization was successful
+    if (db) {
+      startFirestoreListener();
+    } else {
+      // If db is not initialized (due to config error), clear the timeout
+      clearTimeout(connectionTimeout);
+    }
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+    setConnectionStatus("error", `Firebase init failed: ${error.message}`);
+    clearTimeout(connectionTimeout);
+  }
+
+  // Theme toggle event handler
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", () => {
+      const nextTheme = document.body.classList.contains("dark")
+        ? "light"
+        : "dark";
+      applyTheme(nextTheme);
+    });
+  }
+
+  // Language toggle event handler
+  const languageToggleBtn = document.getElementById("languageToggleBtn");
+  if (languageToggleBtn) {
+    languageToggleBtn.addEventListener("click", () => {
+      const nextLang = currentLanguage === "en" ? "ar" : "en";
+      applyLanguage(nextLang);
+    });
+  }
+
+  // Grade filter event handlers
+  const gradeFilterButtons = document.querySelectorAll(".grade-filter-btn");
+  const gradeExportContainer = document.getElementById("gradeExportContainer");
+  const gradeExportBtn = document.getElementById("gradeExportBtn");
+
+  gradeFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // Update active state
+      gradeFilterButtons.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+
+      // Set the filter
+      gradeFilter = btn.dataset.grade;
+
+      // Show export button only for specific grades (not "all")
+      if (gradeFilter !== "all") {
+        gradeExportContainer.classList.remove("hidden");
+        gradeExportBtn.dataset.grade = gradeFilter;
+      } else {
+        gradeExportContainer.classList.add("hidden");
+      }
+
+      // Apply filters
+      filterChildren();
+    });
+  });
+
+  // Set "All" as active by default
+  const allFilterBtn = document.querySelector(
+    '.grade-filter-btn[data-grade="all"]',
+  );
+  if (allFilterBtn) {
+    allFilterBtn.classList.add("is-active");
+  }
+  // Grade export button event handler
+  if (gradeExportBtn) {
+    gradeExportBtn.addEventListener("click", () => {
+      const grade = gradeExportBtn.dataset.grade;
+      exportGradeToPDF(grade);
+    });
+  }
+
+  // Add child button event handlers
+  if (openAddModalBtn) {
+    openAddModalBtn.addEventListener("click", openAddModal);
+  }
+  if (emptyStateAddBtn) {
+    emptyStateAddBtn.addEventListener("click", openAddModal);
+  }
+
+  // Modal event handlers
+  if (cancelModalBtn) {
+    cancelModalBtn.addEventListener("click", closeChildModal);
+  }
+  if (childModalOverlay) {
+    childModalOverlay.addEventListener("click", (event) => {
+      if (event.target === childModalOverlay) closeChildModal();
+    });
+  }
+
+  // Delete modal event handlers
+  if (cancelDeleteBtn) {
+    cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+  }
+  if (deleteModalOverlay) {
+    deleteModalOverlay.addEventListener("click", (event) => {
+      if (event.target === deleteModalOverlay) closeDeleteModal();
+    });
+  }
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener("click", async () => {
+      if (!deletingChildId) return;
+      try {
+        await deleteDoc(doc(db, "children", deletingChildId));
+      } catch (error) {
+        console.error("Error deleting child:", error);
+        showToast("Couldn't delete that child — please try again.");
+      }
+      closeDeleteModal();
+    });
+  }
+
+  // Form submit handler
+  if (childForm) {
+    childForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = fieldName.value.trim();
+      const dob = fieldDob.value;
+      const grade = fieldGrade.value.trim();
+      const address = fieldAddress.value.trim();
+      const phone = fieldPhone.value.trim();
+      const motherPhone = fieldMotherPhone.value.trim();
+      const school = fieldSchool.value.trim();
+      const talent = fieldTalent.value.trim();
+      const fatherConfession = fieldFatherConfession.value;
+      const inScout = fieldInScout.value;
+      const fatherJob = fieldFatherJob.value.trim();
+      const fatherPhone = fieldFatherPhone.value.trim();
+      const fatherFatherConfession = fieldFatherFatherConfession.value;
+      const church = fieldChurch.value.trim();
+      const motherName = fieldMotherName.value.trim();
+      const motherJob = fieldMotherJob.value.trim();
+      const motherFatherConfession = fieldMotherFatherConfession.value;
+      const siblingsCount = fieldSiblingsCount.value;
+      const siblingsNames = fieldSiblingsNames.value.trim();
+      const siblingsDob = fieldSiblingsDob.value.trim();
+      const notes = fieldNotes.value.trim();
+
+      // The `required` attribute on the inputs prevents most invalid states, but this is a good safeguard.
+      if (!name || !dob) {
+        formError.textContent =
+          "Please fill in a valid name and date of birth.";
+        formError.classList.remove("hidden");
+        return;
+      }
+
+      saveChildBtn.disabled = true;
+      try {
+        if (editingChildId) {
+          // Editing an existing child: keep their points untouched, update the rest
+          await updateDoc(doc(db, "children", editingChildId), {
+            name,
+            dob,
+            grade,
+            address,
+            phone,
+            motherPhone,
+            school,
+            talent,
+            fatherConfession,
+            inScout,
+            fatherJob,
+            fatherPhone,
+            fatherFatherConfession,
+            church,
+            motherName,
+            motherJob,
+            motherFatherConfession,
+            siblingsCount,
+            siblingsNames,
+            siblingsDob,
+            notes,
+          });
+          showToast(`${name}'s details were updated`);
+        } else {
+          // Adding a brand-new child, starting at 0 points
+          await addDoc(childrenCollection, {
+            name,
+            dob,
+            grade,
+            address,
+            phone,
+            motherPhone,
+            school,
+            talent,
+            fatherConfession,
+            inScout,
+            fatherJob,
+            fatherPhone,
+            fatherFatherConfession,
+            church,
+            motherName,
+            motherJob,
+            motherFatherConfession,
+            siblingsCount,
+            siblingsNames,
+            siblingsDob,
+            notes,
+            points: 0,
+            createdAt: serverTimestamp(),
+          });
+          showToast(`${name} was added to the board 🎉`);
+        }
+        closeChildModal();
+      } catch (error) {
+        console.error("Error saving child:", error);
+        formError.textContent =
+          "Something went wrong saving that child. Please try again.";
+        formError.classList.remove("hidden");
+      } finally {
+        saveChildBtn.disabled = false;
+      }
+    });
+  }
+
+  // Card click event delegation
+  if (childGrid) {
+    childGrid.addEventListener("click", handleGridClick);
+
+    // Custom point amount form (submit via Enter key or the "Add" button)
+    childGrid.addEventListener("submit", handleCustomPointSubmit);
+  }
+});
+
+// Async function to update child points
+async function updateChildPoints(id, amount, action = "add") {
+  const delta = action === "remove" ? -Math.abs(amount) : Math.abs(amount);
+  try {
+    // Firestore's increment() applies the change atomically on the server,
+    // so simultaneous taps from a phone and a PC never overwrite each other.
+    await updateDoc(doc(db, "children", id), { points: increment(delta) });
+  } catch (error) {
+    console.error("Error updating points:", error);
+    showToast("Couldn't update points — please try again.");
+  }
+}
+
+// Firestore real-time listener
+function startFirestoreListener() {
+  console.log("Starting Firestore listener...");
+
+  // Check if Firebase is initialized
+  if (!db || !childrenCollection) {
+    console.error("Firebase not initialized - check your config");
+    setConnectionStatus("error");
+    showToast("Firebase not configured. Check app.js for errors.");
+    return;
+  }
+
+  onSnapshot(
+    childrenCollection,
+    (snapshot) => {
+      console.log("Firestore connected successfully!");
+      setConnectionStatus("live");
+
+      snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        const data = change.doc.data();
+
+        if (change.type === "added") {
+          // Skip re-adding a card we already have (can happen on first load)
+          if (cardElementsById.has(id)) {
+            applyCardData(cardElementsById.get(id), data);
+            return;
+          }
+          const card = buildCardElement(id, data);
+          childGrid.appendChild(card);
+          cardElementsById.set(id, card);
+        }
+
+        if (change.type === "modified") {
+          const card = cardElementsById.get(id);
+          if (card) applyCardData(card, data);
+        }
+
+        if (change.type === "removed") {
+          const card = cardElementsById.get(id);
+          if (card) {
+            card.classList.add("is-leaving");
+            setTimeout(() => {
+              card.remove();
+              updateEmptyState();
+            }, 280);
+            cardElementsById.delete(id);
+            lastKnownPointsById.delete(id);
+          }
+        }
+      });
+
+      // Sort cards by points (highest first)
+      sortCardsByPoints();
+
+      updateEmptyState();
+      filterChildren(); // Apply search filter after updates
+    },
+    (error) => {
+      console.error("Firestore listener error:", error);
+      setConnectionStatus("error");
+      showToast("Connection failed. Check Firebase config and database rules.");
+    },
+  );
+}
+
+// PDF export function
+function exportGradeToPDF(grade) {
+  // Get all cards for this grade
+  const cards = Array.from(cardElementsById.values()).filter(
+    (card) => card.dataset.grade === grade,
+  );
+
+  if (cards.length === 0) {
+    showToast(`No children found in ${grade}`);
+    return;
+  }
+
+  // Create HTML table for PDF export
+  const t = translations[currentLanguage];
+  let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${t.export} - ${grade}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; direction: ${currentLanguage === "ar" ? "rtl" : "ltr"}; }
+        h1 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: ${currentLanguage === "ar" ? "right" : "left"}; }
+        th { background-color: #4ecdc4; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .header { margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <h1>${t.export} - ${grade}</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>${t.name}</th>
+            <th>${t.points}</th>
+            <th>${t.address}</th>
+            <th>${t.phoneNumber}</th>
+            <th>${t.schoolName}</th>
+            <th>${t.talent}</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  cards.forEach((card) => {
+    const name = card.dataset.name || "";
+    const points = card.querySelector(".points-number")?.textContent || "0";
+    const address = card.dataset.address || "";
+    const phone = card.dataset.phone || card.dataset.motherPhone || "";
+    const school = card.dataset.school || "";
+    const talent = card.dataset.talent || "";
+
+    htmlContent += `
+      <tr>
+        <td>${name}</td>
+        <td>${points}</td>
+        <td>${address}</td>
+        <td>${phone}</td>
+        <td>${school}</td>
+        <td>${talent}</td>
+      </tr>
+    `;
+  });
+
+  htmlContent += `
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  // Create a new window and print it as PDF
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+  printWindow.focus();
+
+  // Trigger print dialog after a short delay
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+
+  showToast(`Exporting ${cards.length} children to PDF...`);
+}
 
 /* ==========================================================================
    RENDERING HELPERS
@@ -253,6 +969,40 @@ function updateEmptyState() {
 }
 
 /* ==========================================================================
+   SEARCH & FILTER FUNCTIONALITY
+   ========================================================================== */
+function filterChildren() {
+  const query = searchQuery.toLowerCase().trim();
+  cardElementsById.forEach((card) => {
+    const name = (card.dataset.name || "").toLowerCase();
+    const grade = (card.dataset.grade || "").toLowerCase();
+    const school = (card.dataset.school || "").toLowerCase();
+    const talent = (card.dataset.talent || "").toLowerCase();
+
+    // Check search query match
+    const matchesQuery =
+      name.includes(query) ||
+      grade.includes(query) ||
+      school.includes(query) ||
+      talent.includes(query);
+
+    // Check grade filter match
+    const matchesGrade =
+      gradeFilter === "all" || card.dataset.grade === gradeFilter;
+
+    // Show card only if both filters pass
+    card.classList.toggle("hidden", !(matchesQuery && matchesGrade));
+  });
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", (event) => {
+    searchQuery = event.target.value;
+    filterChildren();
+  });
+}
+
+/* ==========================================================================
    BUILD / UPDATE A SINGLE CARD
    ========================================================================== */
 
@@ -273,16 +1023,75 @@ function applyCardData(card, data, { isNew = false } = {}) {
   // read them back exactly, without needing a second Firestore lookup.
   card.dataset.name = data.name || "";
   card.dataset.dob = data.dob || "";
+  card.dataset.grade = data.grade || "";
+
+  // Store all data on the dataset for the edit modal
+  for (const key in data) {
+    // Avoid storing objects or functions, only primitives
+    if (
+      typeof data[key] === "string" ||
+      typeof data[key] === "number" ||
+      typeof data[key] === "boolean"
+    ) {
+      // Convert camelCase to kebab-case for dataset attribute
+      card.dataset[key] = String(data[key]);
+    }
+  }
 
   // Name / meta text
   const age = calculateAge(data.dob);
   card.querySelector(".avatar-initials").textContent = getInitials(
     data.name || "?",
   );
+  // Update all .child-name elements (both collapsed and expanded views)
   card.querySelector(".child-name").textContent = data.name || "Unnamed";
+  // Update all .child-grade elements (both collapsed and expanded views)
+  card.querySelector(".child-grade").textContent = data.grade || "No grade set";
+  // Update all .child-meta elements (both collapsed and expanded views)
   card.querySelector(".child-meta").textContent =
     `Age ${age ?? "?"} · Born ${formatDob(data.dob)}`;
+  // Update all .rank-name elements (both collapsed and expanded views)
   card.querySelector(".rank-name").textContent = tier.name;
+
+  // Update detail values
+  card.querySelector(".child-address").textContent = data.address || "—";
+  card.querySelector(".child-phone").textContent =
+    data.phone || data.motherPhone || "—";
+  card.querySelector(".child-school").textContent = data.school || "—";
+  card.querySelector(".child-talent").textContent = data.talent || "—";
+  card.querySelector(".child-father-confession").textContent =
+    data.fatherConfession === "yes" ? "Yes" : "No";
+  card.querySelector(".child-in-scout").textContent =
+    data.inScout === "yes" ? "Yes" : "No";
+  card.querySelector(".child-father-job").textContent = data.fatherJob || "—";
+  card.querySelector(".child-father-phone").textContent =
+    data.fatherPhone || "—";
+  card.querySelector(".child-father-father-confession").textContent =
+    data.fatherFatherConfession === "yes" ? "Yes" : "No";
+  card.querySelector(".child-church").textContent = data.church || "—";
+  card.querySelector(".child-mother-name").textContent = data.motherName || "—";
+  card.querySelector(".child-mother-phone").textContent =
+    data.motherPhone || "—";
+  card.querySelector(".child-mother-job").textContent = data.motherJob || "—";
+  card.querySelector(".child-mother-father-confession").textContent =
+    data.motherFatherConfession === "yes" ? "Yes" : "No";
+
+  // Format siblings info
+  let siblingsText = "—";
+  if (data.siblingsCount && data.siblingsCount > 0) {
+    const names = data.siblingsNames
+      ? data.siblingsNames.split("\n").filter((n) => n.trim())
+      : [];
+    const dobs = data.siblingsDob
+      ? data.siblingsDob.split("\n").filter((d) => d.trim())
+      : [];
+    siblingsText = `${data.siblingsCount} sibling${data.siblingsCount > 1 ? "s" : ""}`;
+    if (names.length > 0) {
+      siblingsText += `: ${names.join(", ")}`;
+    }
+  }
+  card.querySelector(".child-siblings").textContent = siblingsText;
+  card.querySelector(".child-notes").textContent = data.notes || "—";
 
   const rankBadge = card.querySelector(".rank-badge");
   const previousRankEmoji = rankBadge.textContent;
@@ -304,6 +1113,7 @@ function applyCardData(card, data, { isNew = false } = {}) {
   if (isNew) {
     pointsNumberEl.textContent = points;
   } else if (previousPoints !== points) {
+    // Animate all points number elements
     animateNumber(pointsNumberEl, previousPoints, points);
     replayAnimation(pointsNumberEl, "is-popping", 450);
     spawnFloater(pointsDisplayEl, points - previousPoints);
@@ -319,60 +1129,22 @@ function applyCardData(card, data, { isNew = false } = {}) {
 }
 
 /* ==========================================================================
-   FIRESTORE REAL-TIME LISTENER
-   docChanges() tells us precisely which children were added, modified, or
-   removed since the last update — that's what lets us animate in place
-   instead of redrawing the whole grid every time (which would kill the
-   entrance/pop animations and feel janky).
+   SORTING HELPER
    ========================================================================== */
-onSnapshot(
-  childrenCollection,
-  (snapshot) => {
-    setConnectionStatus("live");
+function sortCardsByPoints() {
+  // Get all cards and sort by points (highest first)
+  const cards = Array.from(childGrid.querySelectorAll(".child-card"));
+  cards.sort((a, b) => {
+    const pointsA = Number(a.querySelector(".points-number")?.textContent || 0);
+    const pointsB = Number(b.querySelector(".points-number")?.textContent || 0);
+    return pointsB - pointsA; // Descending order (highest first)
+  });
 
-    snapshot.docChanges().forEach((change) => {
-      const id = change.doc.id;
-      const data = change.doc.data();
+  // Re-append cards in sorted order
+  cards.forEach((card) => childGrid.appendChild(card));
+}
 
-      if (change.type === "added") {
-        // Skip re-adding a card we already have (can happen on first load)
-        if (cardElementsById.has(id)) {
-          applyCardData(cardElementsById.get(id), data);
-          return;
-        }
-        const card = buildCardElement(id, data);
-        childGrid.appendChild(card);
-        cardElementsById.set(id, card);
-      }
-
-      if (change.type === "modified") {
-        const card = cardElementsById.get(id);
-        if (card) applyCardData(card, data);
-      }
-
-      if (change.type === "removed") {
-        const card = cardElementsById.get(id);
-        if (card) {
-          card.classList.add("is-leaving");
-          setTimeout(() => {
-            card.remove();
-            updateEmptyState();
-          }, 280);
-          cardElementsById.delete(id);
-          lastKnownPointsById.delete(id);
-        }
-      }
-    });
-
-    updateEmptyState();
-  },
-  (error) => {
-    console.error("Firestore listener error:", error);
-    setConnectionStatus("error");
-  },
-);
-
-function setConnectionStatus(state) {
+function setConnectionStatus(state, message = "") {
   connectionStatus.classList.remove("is-live", "is-error");
   if (state === "live") {
     connectionStatus.classList.add("is-live");
@@ -380,7 +1152,7 @@ function setConnectionStatus(state) {
   } else if (state === "error") {
     connectionStatus.classList.add("is-error");
     connectionStatusText.textContent =
-      "Couldn't connect — check your Firebase config";
+      message || "Couldn't connect — check your Firebase config";
   } else {
     connectionStatusText.textContent = "Connecting to live sync…";
   }
@@ -391,87 +1163,63 @@ function setConnectionStatus(state) {
    ========================================================================== */
 function openAddModal() {
   editingChildId = null;
-  modalTitle.textContent = "Add a child";
-  saveChildBtn.textContent = "Save child";
+  if (modalTitle) {
+    modalTitle.textContent = translations[currentLanguage].addChildTitle;
+  }
+  if (saveChildBtn) {
+    const saveChildSpan = saveChildBtn.querySelector("span");
+    if (saveChildSpan)
+      saveChildSpan.textContent = translations[currentLanguage].saveChild;
+  }
   childForm.reset();
   formError.classList.add("hidden");
   childModalOverlay.classList.remove("hidden");
-  fieldName.focus();
-}
-
-function openEditModal(id, data) {
-  editingChildId = id;
-  modalTitle.textContent = `Edit ${data.name}`;
-  saveChildBtn.textContent = "Save changes";
-  fieldName.value = data.name || "";
-  fieldDob.value = data.dob || "";
-  formError.classList.add("hidden");
-  childModalOverlay.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   fieldName.focus();
 }
 
 function closeChildModal() {
   childModalOverlay.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   editingChildId = null;
 }
 
-if (themeToggleBtn) {
-  themeToggleBtn.addEventListener("click", () => {
-    const nextTheme = document.body.classList.contains("dark")
-      ? "light"
-      : "dark";
-    applyTheme(nextTheme);
-  });
+function openEditModal(id, data) {
+  editingChildId = id;
+  if (modalTitle) {
+    modalTitle.textContent = `${translations[currentLanguage].editTitle} ${data.name}`;
+  }
+  if (saveChildBtn) {
+    const saveChildSpan = saveChildBtn.querySelector("span");
+    if (saveChildSpan)
+      saveChildSpan.textContent = translations[currentLanguage].saveChanges;
+  }
+  fieldName.value = data.name || "";
+  fieldDob.value = data.dob || "";
+  fieldGrade.value = data.grade || "";
+  fieldAddress.value = data.address || "";
+  fieldPhone.value = data.phone || "";
+  fieldMotherPhone.value = data.motherPhone || "";
+  fieldSchool.value = data.school || "";
+  fieldTalent.value = data.talent || "";
+  fieldFatherConfession.value = data.fatherConfession || "no";
+  fieldInScout.value = data.inScout || "no";
+  fieldFatherJob.value = data.fatherJob || "";
+  fieldFatherPhone.value = data.fatherPhone || "";
+  fieldFatherFatherConfession.value = data.fatherFatherConfession || "no";
+  fieldChurch.value = data.church || "";
+  fieldMotherName.value = data.motherName || "";
+  fieldMotherJob.value = data.motherJob || "";
+  fieldMotherFatherConfession.value = data.motherFatherConfession || "no";
+  fieldSiblingsCount.value = data.siblingsCount || "";
+  fieldSiblingsNames.value = data.siblingsNames || "";
+  fieldSiblingsDob.value = data.siblingsDob || "";
+  fieldNotes.value = data.notes || "";
+  formError.classList.add("hidden");
+  childModalOverlay.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  fieldName.focus();
 }
-
-openAddModalBtn.addEventListener("click", openAddModal);
-emptyStateAddBtn.addEventListener("click", openAddModal);
-cancelModalBtn.addEventListener("click", closeChildModal);
-
-// Clicking the dark overlay (but not the card itself) closes the modal
-childModalOverlay.addEventListener("click", (event) => {
-  if (event.target === childModalOverlay) closeChildModal();
-});
-
-childForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const name = fieldName.value.trim();
-  const dob = fieldDob.value;
-
-  // The `required` attribute on the inputs prevents most invalid states, but this is a good safeguard.
-  if (!name || !dob) {
-    formError.textContent = "Please fill in a valid name and date of birth.";
-    formError.classList.remove("hidden");
-    return;
-  }
-
-  saveChildBtn.disabled = true;
-  try {
-    if (editingChildId) {
-      // Editing an existing child: keep their points untouched, update the rest
-      await updateDoc(doc(db, "children", editingChildId), { name, dob });
-      showToast(`${name}'s details were updated`);
-    } else {
-      // Adding a brand-new child, starting at 0 points
-      await addDoc(childrenCollection, {
-        name,
-        dob,
-        points: 0,
-        createdAt: serverTimestamp(),
-      });
-      showToast(`${name} was added to the board 🎉`);
-    }
-    closeChildModal();
-  } catch (error) {
-    console.error("Error saving child:", error);
-    formError.textContent =
-      "Something went wrong saving that child. Please try again.";
-    formError.classList.remove("hidden");
-  } finally {
-    saveChildBtn.disabled = false;
-  }
-});
 
 /* ==========================================================================
    DELETE CONFIRM MODAL
@@ -488,22 +1236,6 @@ function closeDeleteModal() {
   deletingChildId = null;
 }
 
-cancelDeleteBtn.addEventListener("click", closeDeleteModal);
-deleteModalOverlay.addEventListener("click", (event) => {
-  if (event.target === deleteModalOverlay) closeDeleteModal();
-});
-
-confirmDeleteBtn.addEventListener("click", async () => {
-  if (!deletingChildId) return;
-  try {
-    await deleteDoc(doc(db, "children", deletingChildId));
-  } catch (error) {
-    console.error("Error deleting child:", error);
-    showToast("Couldn't delete that child — please try again.");
-  }
-  closeDeleteModal();
-});
-
 /* ==========================================================================
    EVENT DELEGATION FOR CARD BUTTONS
    Instead of attaching listeners to every single card (which we'd have to
@@ -511,11 +1243,18 @@ confirmDeleteBtn.addEventListener("click", async () => {
    and figure out which card + button was clicked.
    ========================================================================== */
 
-childGrid.addEventListener("click", (event) => {
+function handleGridClick(event) {
   const card = event.target.closest(".child-card");
   if (!card) return;
+
+  handlePointUpdate(event, card);
+  handleCardAction(event, card);
+}
+
+function handlePointUpdate(event, card) {
   const id = card.dataset.id;
 
+  // Quick add/remove buttons
   const pointButton = event.target.closest(
     ".btn-point:not(.btn-point--custom)",
   );
@@ -526,49 +1265,67 @@ childGrid.addEventListener("click", (event) => {
     return;
   }
 
+  // Custom remove button
   const removeCustomBtn = event.target.closest(
     ".btn-point--custom.btn-point--remove",
   );
   if (removeCustomBtn) {
     const form = removeCustomBtn.closest(".custom-point-form");
-    const input = form?.querySelector(".custom-point-input");
-    const amount = Number(input?.value);
-    if (!input?.value.trim() || Number.isNaN(amount) || amount === 0) {
-      input?.focus();
+    if (!form) return; // Ensure form exists
+    const input = form.querySelector(".custom-point-input");
+    if (!input) return; // Ensure input exists
+
+    const amount = Number(input.value);
+    if (!input.value.trim() || Number.isNaN(amount) || amount === 0) {
+      input.focus();
       return;
     }
     updateChildPoints(id, amount, "remove");
     input.value = "";
-    return;
+  }
+}
+
+function handleCardAction(event, card) {
+  const id = card.dataset.id;
+
+  // Expand/Collapse buttons
+  if (event.target.closest(".expand-btn")) {
+    toggleCardExpand(card, true);
+  } else if (event.target.closest(".collapse-btn")) {
+    toggleCardExpand(card, false);
   }
 
-  // Edit button: read the child's current data straight off the card's
-  // dataset (stashed there in applyCardData) to avoid a second Firestore read.
-  if (event.target.closest(".edit-btn")) {
-    openEditModal(id, {
-      name: card.dataset.name || "",
-      dob: card.dataset.dob || "",
-    });
-    return;
+  // Edit button
+  else if (event.target.closest(".edit-btn")) {
+    const childData = { ...card.dataset }; // Get all data from dataset
+    openEditModal(id, childData);
   }
 
   // Delete button
-  if (event.target.closest(".delete-btn")) {
+  else if (event.target.closest(".delete-btn")) {
     const name = card.querySelector(".child-name").textContent;
     openDeleteModal(id, name);
-    return;
   }
-});
 
-// Custom point amount form (submit via Enter key or the "Add" button)
-childGrid.addEventListener("submit", (event) => {
+  // Points display click
+  else if (event.target.closest(".points-display")) {
+    openPointsModal(id, {
+      name: card.dataset.name || "",
+      grade: card.dataset.grade || "",
+      points: lastKnownPointsById.get(id) || 0,
+    });
+  }
+}
+
+function handleCustomPointSubmit(event) {
   const form = event.target.closest(".custom-point-form");
   if (!form) return;
   event.preventDefault();
 
   const card = form.closest(".child-card");
+  if (!card) return; // Ensure card exists
   const input = form.querySelector(".custom-point-input");
-  const amount = Number(input.value);
+  if (!input) return; // Ensure input exists
 
   if (!input.value.trim() || Number.isNaN(amount) || amount === 0) {
     input.focus();
@@ -577,18 +1334,157 @@ childGrid.addEventListener("submit", (event) => {
 
   updateChildPoints(card.dataset.id, amount, "add");
   input.value = "";
-});
+}
 
-async function updateChildPoints(id, amount, action = "add") {
-  const delta = action === "remove" ? -Math.abs(amount) : Math.abs(amount);
-  try {
-    // Firestore's increment() applies the change atomically on the server,
-    // so simultaneous taps from a phone and a PC never overwrite each other.
-    await updateDoc(doc(db, "children", id), { points: increment(delta) });
-  } catch (error) {
-    console.error("Error updating points:", error);
-    showToast("Couldn't update points — please try again.");
+/* ==========================================================================
+   COLLAPSIBLE CARD LOGIC
+   ========================================================================== */
+// Track the currently expanded card
+let expandedCardId = null;
+
+function toggleCardExpand(card, expand) {
+  const id = card.dataset.id;
+  const expandBtn = card.querySelector(".expand-btn");
+  const collapseBtn = card.querySelector(".collapse-btn");
+
+  if (expand) {
+    // If another card is expanded, collapse it first
+    if (expandedCardId && expandedCardId !== id) {
+      const previousCard = cardElementsById.get(expandedCardId);
+      if (previousCard) toggleCardExpand(previousCard, false);
+    }
+
+    card.classList.add("is-expanded");
+    if (expandBtn) expandBtn.style.display = "none"; // Null check
+    if (collapseBtn) collapseBtn.style.display = "block"; // Null check
+    expandedCardId = id;
+  } else {
+    card.classList.remove("is-expanded");
+    if (expandBtn) expandBtn.style.display = "block"; // Null check
+    if (collapseBtn) collapseBtn.style.display = "none"; // Null check
+    if (expandedCardId === id) {
+      expandedCardId = null;
+    }
   }
+}
+
+/* ==========================================================================
+   POINTS EDIT MODAL
+   ========================================================================== */
+let pointsModalChildId = null;
+
+function openPointsModal(id, data) {
+  pointsModalChildId = id;
+
+  // Update modal content
+  if (pointsModalName) pointsModalName.textContent = data.name || "Unnamed";
+  if (pointsModalGrade)
+    pointsModalGrade.textContent = data.grade || "No grade set";
+
+  const points = data.points || 0;
+  const tier = getTier(points);
+  const progress = getRingProgress(points, tier);
+
+  if (pointsModalRank) {
+    pointsModalRank.textContent = tier.name;
+  }
+
+  if (pointsModalValue) {
+    pointsModalValue.textContent = points;
+  }
+
+  if (pointsModalAvatarInitials) {
+    pointsModalAvatarInitials.textContent = getInitials(data.name || "?");
+  }
+
+  if (pointsModalRankBadge) {
+    pointsModalRankBadge.textContent = tier.emoji;
+    pointsModalRankBadge.title = tier.name;
+  }
+
+  if (pointsModalRingFill) {
+    pointsModalRingFill.style.strokeDashoffset = String(
+      RING_CIRCUMFERENCE * (1 - progress),
+    );
+    pointsModalRingFill.style.stroke = tier.color;
+  }
+
+  // Show the modal (backdrop-filter on overlay handles the blur)
+  if (pointsModalOverlay) {
+    pointsModalOverlay.classList.remove("hidden");
+  }
+}
+
+function closePointsModal() {
+  pointsModalChildId = null;
+  if (pointsModalOverlay) {
+    pointsModalOverlay.classList.add("hidden");
+  }
+}
+
+// Points modal event handlers
+if (closePointsModalBtn) {
+  closePointsModalBtn.addEventListener("click", closePointsModal);
+}
+
+if (pointsModalOverlay) {
+  pointsModalOverlay.addEventListener("click", (event) => {
+    if (event.target === pointsModalOverlay) closePointsModal();
+  });
+}
+
+// Points modal point buttons
+if (pointsModalOverlay) {
+  pointsModalOverlay.addEventListener("click", (event) => {
+    const pointButton = event.target.closest(
+      ".btn-point:not(.btn-point--custom)",
+    );
+    if (pointButton && pointsModalChildId) {
+      const amount = Number(pointButton.dataset.amount);
+      const action = pointButton.dataset.action || "add";
+      updateChildPoints(pointsModalChildId, amount, action);
+    }
+  });
+
+  pointsModalOverlay.addEventListener("submit", (event) => {
+    const form = event.target.closest(".custom-point-form--large");
+    if (!form || !pointsModalChildId) return;
+    event.preventDefault();
+
+    const input = form.querySelector(".custom-point-input--large"); // Null check
+    if (!input) return;
+    const amount = Number(input.value);
+
+    if (!input.value.trim() || Number.isNaN(amount) || amount === 0) {
+      input.focus();
+      return;
+    }
+
+    updateChildPoints(pointsModalChildId, amount, "add");
+    input.value = "";
+  });
+
+  pointsModalOverlay.addEventListener("click", (event) => {
+    // Duplicated event listener, should be moved outside
+    const removeCustomBtn = event.target.closest(
+      ".btn-point--custom.btn-point--remove",
+    );
+    if (removeCustomBtn && pointsModalChildId) {
+      const form = removeCustomBtn.closest(".custom-point-form--large");
+      if (!form) return; // Null check
+      const input = form.querySelector(".custom-point-input--large"); // Null check
+      if (!input) return;
+      const amount = Number(input.value);
+
+      if (!input.value.trim() || Number.isNaN(amount) || amount === 0) {
+        input.focus();
+        return;
+      }
+
+      updateChildPoints(pointsModalChildId, amount, "remove");
+      input.value = "";
+    }
+  });
 }
 
 /* ==========================================================================

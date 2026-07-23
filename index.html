@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Star Trackers · Attendance &amp; Reward Board</title>
+    <title>St.George Church · Attendance & Reward Board</title>
+    <link rel="icon" type="image/png" href="assets/church_logo.png" />
 
     <!-- Google Fonts: Baloo 2 for playful display headings, Nunito for readable body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,14 +37,69 @@
       <!-- ============ HEADER ============ -->
       <header class="topbar">
         <div class="brand">
-          <span class="brand-badge">★</span>
+          <img
+            src="assets/church_logo.png"
+            alt="Church Logo"
+            class="brand-badge"
+          />
           <div class="brand-text">
-            <h1>Star Trackers</h1>
-            <p>Attendance &amp; reward board</p>
+            <h1>St.George Church</h1>
+            <p>Attendance & reward board</p>
           </div>
         </div>
 
         <div class="topbar-actions">
+          <div class="grade-filter">
+            <button
+              type="button"
+              class="btn btn-ghost grade-filter-btn"
+              data-grade="all"
+            >
+              All
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost grade-filter-btn"
+              data-grade="4th grade"
+            >
+              4th
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost grade-filter-btn"
+              data-grade="5th grade"
+            >
+              5th
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost grade-filter-btn"
+              data-grade="6th grade"
+            >
+              6th
+            </button>
+          </div>
+          <div class="grade-export hidden" id="gradeExportContainer">
+            <button
+              type="button"
+              class="btn btn-ghost grade-export-btn"
+              id="gradeExportBtn"
+              title="Export grade to file"
+            >
+              <span class="export-icon" aria-hidden="true">📊</span>
+              <span class="export-label">Export</span>
+            </button>
+          </div>
+          <div class="search-container">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search children..."
+              aria-label="Search children"
+            />
+            <span class="search-icon" aria-hidden="true">🔍</span>
+          </div>
           <button
             id="themeToggleBtn"
             class="btn btn-ghost theme-toggle"
@@ -53,6 +109,16 @@
           >
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
             <span class="theme-toggle__label">Dark mode</span>
+          </button>
+          <button
+            id="languageToggleBtn"
+            class="btn btn-ghost language-toggle"
+            type="button"
+            aria-pressed="false"
+            title="Switch language"
+          >
+            <span class="language-toggle__icon" aria-hidden="true">🌐</span>
+            <span class="language-toggle__label">AR</span>
           </button>
           <button id="openAddModalBtn" class="btn btn-primary btn-add">
             <span class="plus-icon">+</span> Add child
@@ -83,23 +149,189 @@
       </main>
     </div>
 
+    <!-- Overlay for expanded card -->
+    <div id="expandOverlay" class="expand-overlay hidden"></div>
+
     <!-- ============ ADD / EDIT MODAL ============ -->
-    <!-- Reused for both "Add child" and "Edit child" — app.js swaps the title/values -->
     <div id="childModalOverlay" class="modal-overlay hidden">
       <form id="childForm" class="modal-card" novalidate>
         <h2 id="modalTitle">Add a child</h2>
 
-        <label class="field">
-          <span>Name</span>
-          <input type="text" id="fieldName" placeholder="e.g. Amira" required />
-        </label>
+        <div class="modal-form-scroll">
+          <label class="field">
+            <span>Name</span>
+            <input
+              type="text"
+              id="fieldName"
+              placeholder="e.g. Amira"
+              required
+            />
+          </label>
 
-        <label class="field">
-          <span>Date of birth</span>
-          <input type="date" id="fieldDob" required />
-        </label>
+          <label class="field">
+            <span>Date of birth</span>
+            <input type="date" id="fieldDob" required />
+          </label>
 
-        <p id="formError" class="form-error hidden"></p>
+          <label class="field">
+            <span>Grade</span>
+            <select id="fieldGrade">
+              <option value="">Select grade</option>
+              <option value="4th grade">4th grade</option>
+              <option value="5th grade">5th grade</option>
+              <option value="6th grade">6th grade</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Address</span>
+            <input type="text" id="fieldAddress" placeholder="Home address" />
+          </label>
+
+          <label class="field">
+            <span>Phone number</span>
+            <input
+              type="tel"
+              id="fieldPhone"
+              placeholder="Child's phone number"
+            />
+          </label>
+
+          <label class="field">
+            <span>Mother's phone number (if no phone)</span>
+            <input
+              type="tel"
+              id="fieldMotherPhone"
+              placeholder="Mother's phone"
+            />
+          </label>
+
+          <label class="field">
+            <span>School name</span>
+            <input type="text" id="fieldSchool" placeholder="School name" />
+          </label>
+
+          <label class="field">
+            <span>Talent or sport</span>
+            <input
+              type="text"
+              id="fieldTalent"
+              placeholder="e.g. Football, Piano"
+            />
+          </label>
+
+          <label class="field">
+            <span>Father's confession</span>
+            <select id="fieldFatherConfession">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>In scout</span>
+            <select id="fieldInScout">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Father's job</span>
+            <input
+              type="text"
+              id="fieldFatherJob"
+              placeholder="Father's occupation"
+            />
+          </label>
+
+          <label class="field">
+            <span>Father's phone</span>
+            <input
+              type="tel"
+              id="fieldFatherPhone"
+              placeholder="Father's phone number"
+            />
+          </label>
+
+          <label class="field">
+            <span>Father's father's confession</span>
+            <select id="fieldFatherFatherConfession">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Church</span>
+            <input type="text" id="fieldChurch" placeholder="Church name" />
+          </label>
+
+          <label class="field">
+            <span>Mother's full name</span>
+            <input
+              type="text"
+              id="fieldMotherName"
+              placeholder="Mother's full name"
+            />
+          </label>
+
+          <label class="field">
+            <span>Mother's job</span>
+            <input
+              type="text"
+              id="fieldMotherJob"
+              placeholder="Mother's occupation"
+            />
+          </label>
+
+          <label class="field">
+            <span>Mother's father's confession</span>
+            <select id="fieldMotherFatherConfession">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Number of brothers/sisters</span>
+            <input
+              type="number"
+              id="fieldSiblingsCount"
+              placeholder="0"
+              min="0"
+            />
+          </label>
+
+          <label class="field">
+            <span>Names of brothers/sisters</span>
+            <textarea
+              id="fieldSiblingsNames"
+              placeholder="One per line"
+              rows="2"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Date of birth of brothers/sisters</span>
+            <textarea
+              id="fieldSiblingsDob"
+              placeholder="One per line, matching names order"
+              rows="2"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Important notes</span>
+            <textarea
+              id="fieldNotes"
+              placeholder="Any important notes..."
+              rows="3"
+            ></textarea>
+          </label>
+
+          <p id="formError" class="form-error hidden"></p>
+        </div>
 
         <div class="modal-actions">
           <button type="button" id="cancelModalBtn" class="btn btn-ghost">
@@ -133,6 +365,124 @@
     <!-- Toast notification for quick feedback (e.g. "Points added!") -->
     <div id="toast" class="toast hidden"></div>
 
+    <!-- ============ POINTS EDIT MODAL ============ -->
+    <div id="pointsModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card points-modal-card">
+        <button
+          type="button"
+          id="closePointsModalBtn"
+          class="btn btn-ghost points-modal-close"
+          title="Close"
+        >
+          ✕
+        </button>
+        <div class="points-modal-content">
+          <div class="points-modal-avatar">
+            <svg
+              class="ring ring--large"
+              viewBox="0 0 120 120"
+              aria-hidden="true"
+            >
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle
+                class="ring-fill ring-fill--large"
+                cx="60"
+                cy="60"
+                r="52"
+              ></circle>
+            </svg>
+            <div class="avatar avatar--large">
+              <span class="avatar-initials avatar-initials--large"></span>
+            </div>
+            <div class="rank-badge rank-badge--large" title=""></div>
+          </div>
+          <h2 id="pointsModalName" class="points-modal-name"></h2>
+          <p id="pointsModalGrade" class="points-modal-grade"></p>
+          <p id="pointsModalRank" class="points-modal-rank"></p>
+
+          <div class="points-display points-display--large">
+            <span
+              id="pointsModalValue"
+              class="points-number points-number--large"
+              data-points="0"
+              >0</span
+            >
+            <span class="points-label points-label--large">points</span>
+          </div>
+
+          <div class="point-controls point-controls--large">
+            <div class="quick-buttons quick-buttons--large">
+              <button
+                class="btn-point btn-point--remove btn-point--large"
+                data-action="remove"
+                data-amount="5"
+              >
+                −5
+              </button>
+              <button
+                class="btn-point btn-point--remove btn-point--large"
+                data-action="remove"
+                data-amount="10"
+              >
+                −10
+              </button>
+              <button
+                class="btn-point btn-point--remove btn-point--large"
+                data-action="remove"
+                data-amount="50"
+              >
+                −50
+              </button>
+              <button
+                class="btn-point btn-point--add btn-point--large"
+                data-action="add"
+                data-amount="5"
+              >
+                +5
+              </button>
+              <button
+                class="btn-point btn-point--add btn-point--large"
+                data-action="add"
+                data-amount="10"
+              >
+                +10
+              </button>
+              <button
+                class="btn-point btn-point--add btn-point--large"
+                data-action="add"
+                data-amount="50"
+              >
+                +50
+              </button>
+            </div>
+            <form class="custom-point-form custom-point-form--large">
+              <input
+                type="number"
+                class="custom-point-input custom-point-input--large"
+                placeholder="Custom amount"
+                aria-label="Custom point amount"
+              />
+              <div class="custom-point-actions custom-point-actions--large">
+                <button
+                  type="submit"
+                  class="btn-point btn-point--custom btn-point--add btn-point--large"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  class="btn-point btn-point--custom btn-point--remove btn-point--large"
+                  data-action="remove"
+                >
+                  Remove
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Card template used by app.js to stamp out each child -->
     <template id="childCardTemplate">
       <article class="child-card" data-id="">
@@ -163,103 +513,223 @@
         </div>
 
         <h3 class="child-name"></h3>
+        <p class="child-grade"></p>
         <p class="child-meta"></p>
         <p class="rank-name"></p>
 
         <div class="points-display">
           <span class="points-number" data-points="0">0</span>
-          <span class="points-label">points</span>
+          <span class="points-label" data-translate-key="points">points</span>
         </div>
 
-        <div class="point-controls">
-          <div class="quick-buttons">
-            <button
-              class="btn-point btn-point--remove"
-              data-action="remove"
-              data-amount="5"
-            >
-              −5
-            </button>
-            <button
-              class="btn-point btn-point--remove"
-              data-action="remove"
-              data-amount="10"
-            >
-              −10
-            </button>
-            <button
-              class="btn-point btn-point--remove"
-              data-action="remove"
-              data-amount="50"
-            >
-              −50
-            </button>
-            <button
-              class="btn-point btn-point--add"
-              data-action="add"
-              data-amount="5"
-            >
-              +5
-            </button>
-            <button
-              class="btn-point btn-point--add"
-              data-action="add"
-              data-amount="10"
-            >
-              +10
-            </button>
-            <button
-              class="btn-point btn-point--add"
-              data-action="add"
-              data-amount="50"
-            >
-              +50
-            </button>
-          </div>
-          <form class="custom-point-form">
-            <input
-              type="number"
-              class="custom-point-input"
-              placeholder="Custom amount"
-              aria-label="Custom point amount"
-            />
-            <div class="custom-point-actions">
-              <button
-                type="submit"
-                class="btn-point btn-point--custom btn-point--add"
-              >
-                Add
-              </button>
-              <button
-                type="button"
-                class="btn-point btn-point--custom btn-point--remove"
-                data-action="remove"
-              >
-                Remove
-              </button>
+        <!-- This section is toggled by JS -->
+        <div class="card-expanded">
+          <div class="card-expanded-content">
+            <div class="point-controls">
+              <div class="quick-buttons">
+                <button
+                  class="btn-point btn-point--remove"
+                  data-action="remove"
+                  data-amount="5"
+                >
+                  −5
+                </button>
+                <button
+                  class="btn-point btn-point--remove"
+                  data-action="remove"
+                  data-amount="10"
+                >
+                  −10
+                </button>
+                <button
+                  class="btn-point btn-point--remove"
+                  data-action="remove"
+                  data-amount="50"
+                >
+                  −50
+                </button>
+                <button
+                  class="btn-point btn-point--add"
+                  data-action="add"
+                  data-amount="5"
+                >
+                  +5
+                </button>
+                <button
+                  class="btn-point btn-point--add"
+                  data-action="add"
+                  data-amount="10"
+                >
+                  +10
+                </button>
+                <button
+                  class="btn-point btn-point--add"
+                  data-action="add"
+                  data-amount="50"
+                >
+                  +50
+                </button>
+              </div>
+              <form class="custom-point-form">
+                <input
+                  type="number"
+                  class="custom-point-input"
+                  placeholder="Custom amount"
+                  aria-label="Custom point amount"
+                />
+                <div class="custom-point-actions">
+                  <button
+                    type="submit"
+                    class="btn-point btn-point--custom btn-point--add"
+                  >
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-point btn-point--custom btn-point--remove"
+                    data-action="remove"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
+
+            <div class="child-details">
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="addressLabel"
+                  >Address:</span
+                >
+                <span class="detail-value child-address"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="phoneLabel"
+                  >Phone:</span
+                >
+                <span class="detail-value child-phone"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="schoolLabel"
+                  >School:</span
+                >
+                <span class="detail-value child-school"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="talentLabel"
+                  >Talent/Sport:</span
+                >
+                <span class="detail-value child-talent"></span>
+              </div>
+              <div class="detail-row">
+                <span
+                  class="detail-label"
+                  data-translate-key="fathersConfessionLabel"
+                  >Father's confession:</span
+                >
+                <span class="detail-value child-father-confession"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="inScoutLabel"
+                  >In Scout:</span
+                >
+                <span class="detail-value child-in-scout"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="fathersJobLabel"
+                  >Father's job:</span
+                >
+                <span class="detail-value child-father-job"></span>
+              </div>
+              <div class="detail-row">
+                <span
+                  class="detail-label"
+                  data-translate-key="fathersPhoneLabel"
+                  >Father's phone:</span
+                >
+                <span class="detail-value child-father-phone"></span>
+              </div>
+              <div class="detail-row">
+                <span
+                  class="detail-label"
+                  data-translate-key="fathersFathersConfessionLabel"
+                  >Father's father's confession:</span
+                >
+                <span
+                  class="detail-value child-father-father-confession"
+                ></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="churchLabel"
+                  >Church:</span
+                >
+                <span class="detail-value child-church"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="mothersNameLabel"
+                  >Mother's name:</span
+                >
+                <span class="detail-value child-mother-name"></span>
+              </div>
+              <div class="detail-row">
+                <span
+                  class="detail-label"
+                  data-translate-key="mothersPhoneLabel"
+                  >Mother's phone:</span
+                >
+                <span class="detail-value child-mother-phone"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="mothersJobLabel"
+                  >Mother's job:</span
+                >
+                <span class="detail-value child-mother-job"></span>
+              </div>
+              <div class="detail-row">
+                <span
+                  class="detail-label"
+                  data-translate-key="mothersFathersConfessionLabel"
+                  >Mother's father's confession:</span
+                >
+                <span
+                  class="detail-value child-mother-father-confession"
+                ></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="siblingsLabel"
+                  >Siblings:</span
+                >
+                <span class="detail-value child-siblings"></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label" data-translate-key="notesLabel"
+                  >Notes:</span
+                >
+                <span class="detail-value child-notes"></span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <button
+          class="btn btn-ghost expand-btn"
+          type="button"
+          style="display: block"
+          data-translate-key="showDetails"
+        >
+          Show details
+        </button>
+        <button
+          class="btn btn-ghost collapse-btn"
+          type="button"
+          style="display: none"
+          data-translate-key="hideDetails"
+        >
+          Hide details
+        </button>
       </article>
     </template>
 
     <!-- ============ FIREBASE ============ -->
-    <!-- Modular Firebase v10 SDK, loaded straight from Google's CDN as ES modules -->
-    <script type="module">
-      // A small pre-flight check to ensure the Firebase config has been updated.
-      // This is the most common reason for the app not "working" on first run.
-      import { firebaseConfig } from "./app.js";
-      if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-        const errorEl = document.getElementById("configError");
-        if (errorEl) errorEl.classList.remove("hidden");
-
-        // Hide the rest of the app to avoid user confusion
-        document.querySelector(".topbar").classList.add("hidden");
-        document.getElementById("connectionStatus").classList.add("hidden");
-        document.getElementById("childGrid").classList.add("hidden");
-        document.getElementById("emptyState").classList.add("hidden");
-      }
-    </script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -172,6 +172,24 @@ input {
   flex-wrap: wrap;
 }
 
+.grade-filter {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.grade-filter-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-width: 45px;
+}
+
+.grade-filter-btn.is-active {
+  background: var(--teal);
+  color: white;
+  border-color: var(--teal);
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -186,14 +204,11 @@ input {
 }
 
 .brand-badge {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--sun), var(--coral));
-  color: white;
-  font-size: 26px;
+  object-fit: cover;
   box-shadow: var(--shadow-soft);
   transform: rotate(-6deg);
 }
@@ -357,6 +372,94 @@ body.dark .rank-name {
   color: var(--teal);
 }
 
+/* Arabic language support (RTL) */
+body.arabic {
+  direction: rtl;
+  text-align: right;
+}
+
+body.arabic .topbar {
+  direction: rtl;
+}
+
+body.arabic .topbar-actions {
+  direction: rtl;
+}
+
+body.arabic .grade-filter {
+  direction: rtl;
+}
+
+body.arabic .grade-export {
+  direction: rtl;
+}
+
+body.arabic .search-container {
+  direction: rtl;
+}
+
+body.arabic .brand-text h1,
+body.arabic .brand-text p,
+body.arabic h1,
+body.arabic h2,
+body.arabic h3,
+body.arabic p,
+body.arabic span,
+body.arabic button,
+body.arabic input,
+body.arabic select,
+body.arabic textarea,
+body.arabic label {
+  font-family: "Cairo", "Arial", sans-serif;
+}
+
+body.arabic .card-top-actions {
+  left: 10px;
+  right: auto;
+}
+
+body.arabic .collapse-btn {
+  right: 8px;
+  left: auto;
+}
+
+body.arabic .modal-actions {
+  flex-direction: row-reverse;
+}
+
+body.arabic .custom-point-actions {
+  flex-direction: row-reverse;
+}
+
+body.arabic .quick-buttons {
+  flex-direction: row-reverse;
+}
+
+body.arabic .field input,
+body.arabic .field textarea,
+body.arabic .field select {
+  text-align: right;
+}
+
+body.arabic .search-input {
+  text-align: right;
+  padding-left: 32px;
+  padding-right: 12px;
+}
+
+body.arabic .search-icon {
+  left: auto;
+  right: 10px;
+}
+
+body.arabic .child-details {
+  text-align: right;
+}
+
+body.arabic .detail-row {
+  flex-direction: row-reverse;
+}
+
 /* ==========================================================================
    EMPTY STATE
    ========================================================================== */
@@ -387,8 +490,8 @@ body.dark .rank-name {
    ========================================================================== */
 .child-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
 
 /* ==========================================================================
@@ -401,7 +504,7 @@ body.dark .rank-name {
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-lg);
-  padding: 22px 20px 20px;
+  padding: 16px 14px 14px;
   box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
@@ -411,6 +514,7 @@ body.dark .rank-name {
     transform 0.25s ease,
     box-shadow 0.25s ease;
   animation: card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  cursor: pointer;
 }
 .child-card:hover {
   transform: translateY(-4px);
@@ -443,23 +547,23 @@ body.dark .rank-name {
 
 .card-top-actions {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 10px;
+  right: 10px;
   display: flex;
-  gap: 6px;
+  gap: 4px;
   /* Fade in on hover for a cleaner look */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
 .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-soft);
-  font-size: 14px;
+  font-size: 12px;
   display: grid;
   place-items: center;
   transition:
@@ -486,9 +590,9 @@ body.dark .rank-name {
 /* --- Avatar + progress ring (signature element) --- */
 .avatar-wrap {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin-bottom: 14px;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 10px;
 }
 
 .ring {
@@ -499,7 +603,7 @@ body.dark .rank-name {
 .ring-bg,
 .ring-fill {
   fill: none;
-  stroke-width: 8;
+  stroke-width: 6;
 }
 .ring-bg {
   stroke: var(--ring-track);
@@ -507,8 +611,8 @@ body.dark .rank-name {
 .ring-fill {
   stroke: var(--teal);
   stroke-linecap: round;
-  stroke-dasharray: 326.7; /* 2 * PI * 52, precomputed circumference */
-  stroke-dashoffset: 326.7;
+  stroke-dasharray: 264; /* 2 * PI * 42, precomputed circumference */
+  stroke-dashoffset: 264;
   transition:
     stroke-dashoffset 0.8s cubic-bezier(0.65, 0, 0.35, 1),
     stroke 0.4s ease;
@@ -516,7 +620,7 @@ body.dark .rank-name {
 
 .avatar {
   position: absolute;
-  inset: 12px;
+  inset: 10px;
   border-radius: 50%;
   background: linear-gradient(135deg, #fff, #f0f3fa);
   display: grid;
@@ -525,22 +629,22 @@ body.dark .rank-name {
 }
 .avatar-initials {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--ink);
 }
 
 .rank-badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 34px;
-  height: 34px;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--surface-solid);
   display: grid;
   place-items: center;
-  font-size: 18px;
+  font-size: 14px;
   box-shadow: var(--shadow-soft);
   border: 2px solid white;
 }
@@ -565,19 +669,25 @@ body.dark .rank-name {
 }
 
 .child-name {
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 700;
   margin-top: 2px;
 }
 .child-meta {
   margin: 2px 0 0;
   color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
+}
+.child-grade {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
 }
 .rank-name {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -586,14 +696,14 @@ body.dark .rank-name {
 
 /* --- Points display --- */
 .points-display {
-  margin: 14px 0 6px;
+  margin: 10px 0 4px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 .points-number {
   font-family: var(--font-display);
-  font-size: 42px;
+  font-size: 32px;
   font-weight: 800;
   color: var(--coral);
   line-height: 1;
@@ -615,8 +725,8 @@ body.dark .rank-name {
   }
 }
 .points-label {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 
@@ -625,7 +735,7 @@ body.dark .rank-name {
   position: absolute;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 18px;
   color: var(--mint);
   pointer-events: none;
   animation: float-up 0.9s ease forwards;
@@ -638,22 +748,22 @@ body.dark .rank-name {
   }
   100% {
     opacity: 0;
-    transform: translateY(-46px);
+    transform: translateY(-36px);
   }
 }
 
 /* --- Point controls --- */
 .point-controls {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .quick-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -661,12 +771,12 @@ body.dark .rank-name {
 .btn-point {
   border: none;
   border-radius: 999px;
-  padding: 9px 0;
+  padding: 6px 0;
   flex: 1 1 0;
-  min-width: 58px;
-  font-weight: 800;
-  font-size: 14px;
-  box-shadow: 0 6px 14px rgba(255, 209, 102, 0.45);
+  min-width: 45px;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 4px 10px rgba(255, 209, 102, 0.45);
   transition:
     transform 0.12s ease,
     box-shadow 0.12s ease,
@@ -688,28 +798,28 @@ body.dark .rank-name {
 .btn-point--remove {
   background: linear-gradient(135deg, var(--coral), var(--coral-dark));
   color: white;
-  box-shadow: 0 6px 14px rgba(255, 107, 107, 0.35);
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
 }
 
 .custom-point-form {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .custom-point-actions {
   display: flex;
-  gap: 8px;
-  flex: 1 1 180px;
+  gap: 6px;
+  flex: 1 1 140px;
 }
 .custom-point-input {
   flex: 1;
   min-width: 0;
   border: 2px solid #e2e6f0;
   border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--ink);
   transition: border-color 0.15s ease;
 }
@@ -720,8 +830,8 @@ body.dark .rank-name {
 .btn-point--custom {
   background: linear-gradient(135deg, var(--teal), var(--teal-dark));
   color: white;
-  box-shadow: 0 6px 14px rgba(78, 205, 196, 0.4);
-  padding: 8px 18px;
+  box-shadow: 0 4px 10px rgba(78, 205, 196, 0.4);
+  padding: 6px 14px;
   flex: 1 1 0;
 }
 
@@ -732,12 +842,11 @@ body.dark .rank-name {
   position: fixed;
   inset: 0;
   background: rgba(45, 49, 66, 0.45);
-  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 50;
+  z-index: 2000;
   animation: overlay-in 0.2s ease both;
 }
 @keyframes overlay-in {
@@ -752,17 +861,18 @@ body.dark .rank-name {
 .modal-card {
   background: var(--surface-solid);
   border-radius: var(--radius-lg);
-  padding: 30px 28px;
+  padding: 24px 20px 20px 20px;
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
+  max-height: 80vh;
   box-shadow: var(--shadow-lift);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   animation: modal-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 .modal-card--small {
-  max-width: 380px;
+  max-width: 340px;
 }
 
 @keyframes modal-in {
@@ -779,40 +889,61 @@ body.dark .rank-name {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 800;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
-.field input {
+.field input,
+.field textarea,
+.field select {
   border: 2px solid #e2e6f0;
   border-radius: var(--radius-sm);
-  padding: 11px 14px;
-  font-size: 15px;
-  font-weight: 700;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink);
   text-transform: none;
   letter-spacing: normal;
   transition: border-color 0.15s ease;
+  font-family: var(--font-body);
 }
-.field input:focus {
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
   outline: none;
   border-color: var(--teal);
 }
+.field textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+.field select {
+  appearance: none;
+  background: white
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7085' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E")
+    no-repeat right 10px center/10px;
+  padding-right: 30px;
+}
+body.dark .field select {
+  background: rgba(15, 23, 42, 0.8)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23cbd5e1' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E")
+    no-repeat right 10px center/10px;
+}
 
 .form-error {
-  margin: -6px 0 0;
+  margin: -4px 0 0;
   color: var(--coral-dark);
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
   margin-top: 4px;
 }
 
@@ -821,15 +952,15 @@ body.dark .rank-name {
    ========================================================================== */
 .toast {
   position: fixed;
-  bottom: 26px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%) translateY(0);
   background: var(--ink);
   color: white;
-  padding: 12px 22px;
+  padding: 10px 18px;
   border-radius: 999px;
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 13px;
   box-shadow: var(--shadow-lift);
   z-index: 60;
   animation: toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -858,11 +989,128 @@ body.dark .rank-name {
 }
 
 /* ==========================================================================
+   SEARCH INPUT
+   ========================================================================== */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-input {
+  border: 2px solid #e2e6f0;
+  border-radius: 999px;
+  padding: 8px 12px 8px 32px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  width: 160px;
+  transition:
+    border-color 0.15s ease,
+    width 0.2s ease;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--teal);
+  width: 180px;
+}
+.search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 12px;
+  pointer-events: none;
+}
+body.dark .search-input {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(148, 163, 184, 0.26);
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   CHILD DETAILS (Expanded overlay)
+   ========================================================================== */
+/* Collapsed view - visible by default */
+.card-collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Expanded overlay - covers the entire card when expanded */
+.card-expanded {
+  /* Animate height using grid-template-rows for a smooth transition */
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  width: 100%;
+}
+
+.child-card.is-expanded .card-expanded {
+  grid-template-rows: 1fr;
+}
+
+/* This inner wrapper is necessary for the grid animation to work correctly */
+.card-expanded-content {
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+.child-details {
+  width: 100%;
+  margin: 8px 0;
+  text-align: left;
+  animation: fade-in 0.3s ease;
+}
+
+.child-card.is-expanded .card-expanded-content {
+  opacity: 1;
+}
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(226, 230, 240, 0.5);
+}
+.detail-row:last-of-type {
+  border-bottom: none;
+}
+.detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  letter-spacing: 0.3px;
+}
+.detail-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+body.dark .detail-row {
+  border-bottom-color: rgba(148, 163, 184, 0.15);
+}
+.expand-btn,
+.collapse-btn {
+  font-size: 11px;
+  padding: 5px 12px;
+  margin-top: 8px;
+}
+
+.collapse-btn {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+
+/* ==========================================================================
    RESPONSIVE ADJUSTMENTS
    ========================================================================== */
 @media (max-width: 640px) {
   .app {
-    padding: 16px 14px 60px;
+    padding: 12px 10px 50px;
   }
 
   .topbar {
@@ -878,14 +1126,22 @@ body.dark .rank-name {
 
   .child-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .brand-text h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .modal-card {
-    padding: 24px 20px;
+    padding: 20px 16px;
+  }
+
+  .search-input {
+    width: 130px;
+  }
+  .search-input:focus {
+    width: 150px;
   }
 }
 
@@ -893,4 +1149,153 @@ body.dark .rank-name {
   .app {
     max-width: 1400px;
   }
+}
+
+/* ==========================================================================
+   POINTS EDIT MODAL
+   ========================================================================== */
+.points-modal-card {
+  max-width: 420px;
+  padding: 30px 24px;
+  text-align: center;
+}
+
+.points-modal-avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+}
+
+.ring--large {
+  width: 120px;
+  height: 120px;
+}
+
+.avatar--large {
+  inset: 12px;
+  width: 96px;
+  height: 96px;
+}
+
+.avatar-initials--large {
+  font-size: 28px;
+}
+
+.rank-badge--large {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  bottom: 4px;
+  right: 4px;
+}
+
+.points-modal-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.points-modal-grade {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+
+.points-modal-rank {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--teal-dark);
+  margin: 0 0 16px;
+}
+
+.points-display--large {
+  margin: 12px 0 20px;
+}
+
+.points-number--large {
+  font-size: 48px;
+}
+
+.points-label--large {
+  font-size: 14px;
+}
+
+.point-controls--large {
+  width: 100%;
+}
+
+.quick-buttons--large {
+  gap: 8px;
+}
+
+.btn-point--large {
+  min-width: 60px;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.custom-point-form--large {
+  margin-top: 12px;
+}
+
+.custom-point-input--large {
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.custom-point-actions--large {
+  flex: 1 1 160px;
+}
+
+.points-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+}
+
+/* Modal form scroll container */
+.modal-form-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Scrollbar styling for webkit */
+.modal-form-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-form-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-form-scroll::-webkit-scrollbar-thumb {
+  background: rgba(155, 165, 191, 0.3);
+  border-radius: 3px;
+}
+
+.modal-form-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(155, 165, 191, 0.5);
+}
+
+body.dark .modal-form-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+body.dark .modal-form-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
 }
